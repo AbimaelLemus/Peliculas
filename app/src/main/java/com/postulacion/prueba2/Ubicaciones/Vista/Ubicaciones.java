@@ -1,12 +1,11 @@
 package com.postulacion.prueba2.Ubicaciones.Vista;
 
 import android.os.Bundle;
-
-import androidx.fragment.app.Fragment;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import androidx.fragment.app.Fragment;
 
 import com.postulacion.prueba2.R;
 
