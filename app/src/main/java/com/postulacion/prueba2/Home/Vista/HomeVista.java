@@ -1,12 +1,9 @@
 package com.postulacion.prueba2.Home.Vista;
 
+import android.os.Bundle;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager.widget.ViewPager;
-
-import android.bluetooth.le.AdvertiseData;
-import android.os.Bundle;
-import android.util.Log;
-import android.widget.TableLayout;
 
 import com.google.android.material.tabs.TabLayout;
 import com.postulacion.prueba2.Home.Adapter.AdapterHome;
@@ -32,9 +29,6 @@ public class HomeVista extends AppCompatActivity {
         tlHome.setupWithViewPager(vpHome);
 
         //agregar iconos a los tab y agregar titulo de la pantalla respecto al tab
-        int positionVP = vpHome.getCurrentItem();
-        int positionTL = tlHome.getSelectedTabPosition();
-        Log.e(TAG, "onCreate: " + positionVP + " - " + positionTL );
 
     }
 }
