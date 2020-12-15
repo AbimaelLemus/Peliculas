@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Postulación</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="peliculas">Peliculas</string>
+    <string name="pathMovies" translatable="false">https://api.themoviedb.org/3/movie/550?api_key=a01845c41c53a55ae2454547f29544af</string>
+</resources>
