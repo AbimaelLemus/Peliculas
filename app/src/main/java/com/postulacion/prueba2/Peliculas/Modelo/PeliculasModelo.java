@@ -37,8 +37,8 @@ public class PeliculasModelo implements InterfacesPeliculas.Modelo {
 
         @Override
         protected String doInBackground(String... strings) {
-
-            return new Conexion().peliculas("https://api.themoviedb.org/3/movie/550?api_key=a01845c41c53a55ae2454547f29544af");
+            //http://api.themoviedb.org/3/discover/movie?sort_by=vote_average.desc&api_key=
+            return new Conexion().peliculas("https://api.themoviedb.org/3/discover/movie?sort_by=popularity.desc&api_key=a01845c41c53a55ae2454547f29544af");
         }
 
         @Override

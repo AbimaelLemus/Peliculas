@@ -3,17 +3,12 @@ package com.postulacion.prueba2.Peliculas.Bean;
 public class BeanMovies {
 
     private int id;
-    private int voteAverage;
-    private int voteCount;
-    private String originalTitle;
     private String title;
-    private double popularity;
-    private String backdropPath;
-    private String overview;
-    private String releaseDate;
-    private String poster_path;
-    private String homepage;
     private String backdrop_path;
+    private String poster_path;
+    private String original_language;
+    private String overview;
+    private String release_date;
 
     public int getId() {
         return id;
@@ -21,30 +16,6 @@ public class BeanMovies {
 
     public void setId(int id) {
         this.id = id;
-    }
-
-    public int getVoteAverage() {
-        return voteAverage;
-    }
-
-    public void setVoteAverage(int voteAverage) {
-        this.voteAverage = voteAverage;
-    }
-
-    public int getVoteCount() {
-        return voteCount;
-    }
-
-    public void setVoteCount(int voteCount) {
-        this.voteCount = voteCount;
-    }
-
-    public String getOriginalTitle() {
-        return originalTitle;
-    }
-
-    public void setOriginalTitle(String originalTitle) {
-        this.originalTitle = originalTitle;
     }
 
     public String getTitle() {
@@ -55,36 +26,12 @@ public class BeanMovies {
         this.title = title;
     }
 
-    public double getPopularity() {
-        return popularity;
+    public String getBackdrop_path() {
+        return backdrop_path;
     }
 
-    public void setPopularity(double popularity) {
-        this.popularity = popularity;
-    }
-
-    public String getBackdropPath() {
-        return backdropPath;
-    }
-
-    public void setBackdropPath(String backdropPath) {
-        this.backdropPath = backdropPath;
-    }
-
-    public String getOverview() {
-        return overview;
-    }
-
-    public void setOverview(String overview) {
-        this.overview = overview;
-    }
-
-    public String getReleaseDate() {
-        return releaseDate;
-    }
-
-    public void setReleaseDate(String releaseDate) {
-        this.releaseDate = releaseDate;
+    public void setBackdrop_path(String backdrop_path) {
+        this.backdrop_path = backdrop_path;
     }
 
     public String getPoster_path() {
@@ -95,19 +42,27 @@ public class BeanMovies {
         this.poster_path = poster_path;
     }
 
-    public String getHomepage() {
-        return homepage;
+    public String getOriginal_language() {
+        return original_language;
     }
 
-    public void setHomepage(String homepage) {
-        this.homepage = homepage;
+    public void setOriginal_language(String original_language) {
+        this.original_language = original_language;
     }
 
-    public String getBackdrop_path() {
-        return backdrop_path;
+    public String getOverview() {
+        return overview;
     }
 
-    public void setBackdrop_path(String backdrop_path) {
-        this.backdrop_path = backdrop_path;
+    public void setOverview(String overview) {
+        this.overview = overview;
+    }
+
+    public String getRelease_date() {
+        return release_date;
+    }
+
+    public void setRelease_date(String release_date) {
+        this.release_date = release_date;
     }
 }

@@ -11,4 +11,7 @@
     <color name="secondaryDarkColor">#7f0000</color>
     <color name="colorNegro">#000000</color>
     <color name="colorBlanco">#ffffff</color>
+    <color name="colorRojo">#FF0000</color>
+    <color name="semiTransparente">#426BD700</color>
+    <color name="transparente">#00CCC7C7</color>
 </resources>

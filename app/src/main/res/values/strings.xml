@@ -5,5 +5,10 @@
     <string name="imagenes">Imágenes</string>
     <string name="ubicacion">Ubicaciones</string>
     <string name="peliculas">Peliculas</string>
-    <string name="pathMovies" translatable="false">https://api.themoviedb.org/3/movie/550?api_key=a01845c41c53a55ae2454547f29544af</string>
+    <string name="key" translatable="false">a01845c41c53a55ae2454547f29544af</string>
+    <!--solo trae una pelicula-->
+    <!--<string name="pathMovies" translatable="false">https://api.themoviedb.org/3/movie/550?api_key=a01845c41c53a55ae2454547f29544af</string>-->
+    <string name="aceptar">Aceptar</string>
+    <string name="cerrar">Cerrar</string>
+    <string name="alertInfoMovieTitulo">Información</string>
 </resources>
