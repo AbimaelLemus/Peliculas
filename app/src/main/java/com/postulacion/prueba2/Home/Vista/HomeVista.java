@@ -23,7 +23,7 @@ public class HomeVista extends AppCompatActivity {
         vpHome = findViewById(R.id.vpHome);
         tlHome = findViewById(R.id.tlHome);
 
-        AdapterHome adapter = new AdapterHome(getSupportFragmentManager(), HomeVista.this);
+        AdapterHome adapter = new AdapterHome(getSupportFragmentManager(), HomeVista.this, HomeVista.this);
 
         vpHome.setAdapter(adapter);
         tlHome.setupWithViewPager(vpHome);

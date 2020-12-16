@@ -1,65 +1,199 @@
 package com.postulacion.prueba2.SubirImagenes.Vista;
 
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.MediaScannerConnection;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.os.StrictMode;
+import android.provider.MediaStore;
+import android.util.Base64;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.postulacion.prueba2.R;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link Subir_Imagen#newInstance} factory method to
- * create an instance of this fragment.
- */
-public class Subir_Imagen extends Fragment {
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+import static android.app.Activity.RESULT_OK;
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+public class Subir_Imagen extends Fragment implements View.OnClickListener {
+    private Activity activity;
+    private ImageView ivImagen;
+    private String TAG = "Subir_Imagen";
+    private static String app_Directory = "DCIM/Camera/";
+    private String mPath = "";
 
-    public Subir_Imagen() {
-        // Required empty public constructor
-    }
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment Subir_Imagen.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static Subir_Imagen newInstance(String param1, String param2) {
-        Subir_Imagen fragment = new Subir_Imagen();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
+    public Subir_Imagen(Activity activity) {
+        this.activity = activity;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_subir__imagen, container, false);
+        View view = inflater.inflate(R.layout.fragment_subir__imagen, container, false);
+
+        ivImagen = view.findViewById(R.id.ivSubir);
+
+        view.findViewById(R.id.btnSubirCamara).setOnClickListener(this);
+        view.findViewById(R.id.btnSubirGaleria).setOnClickListener(this);
+
+        return view;
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        Log.e(TAG, "onActivityResult: " + requestCode + " - " + resultCode + " - " + data);
+
+        if (resultCode == RESULT_OK) {
+            if (requestCode == 1) {
+
+
+                MediaScannerConnection.scanFile(getContext(), new String[]{mPath}, null, new MediaScannerConnection.MediaScannerConnectionClient() {
+                    @Override
+                    public void onMediaScannerConnected() {
+                    }
+
+                    @Override
+                    public void onScanCompleted(String s, Uri uri) {
+                    }
+                });
+                //Log.w(TAG, "######################" + mPath + "");
+
+                ///storage/emulated/0/DCIM/Camera//Img_1608132208.jpg
+                File imagen = new File(mPath);
+                Uri imageUri = Uri.fromFile(imagen);
+
+                try {
+                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), imageUri);
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+                    byte[] imageInByte = baos.toByteArray();
+                    String encoded = Base64.encodeToString(imageInByte, Base64.DEFAULT);
+
+
+                    byte[] contenido = Base64.decode(encoded, Base64.DEFAULT);
+                    Bitmap bitmap2 = BitmapFactory.decodeByteArray(contenido, 0, contenido.length);
+                    ivImagen.setImageBitmap(bitmap2);
+                    subirImagen(mPath);
+                } catch (Exception e) {
+                    Log.e(TAG, "onActivityResult: " + e.getCause());
+                    e.printStackTrace();
+                }
+            } else if (requestCode == 2) {
+                Uri selectedImage = data.getData();
+                String[] filePath = {MediaStore.Images.Media.DATA};
+                Cursor c = getActivity().getContentResolver().query(selectedImage, filePath, null, null, null);
+                c.moveToFirst();
+                int columnIndex = c.getColumnIndex(filePath[0]);
+                String picturePath = c.getString(columnIndex);
+                c.close();
+                Bitmap thumbnail = (BitmapFactory.decodeFile(picturePath));
+                //Log.w(TAG, "######################" + picturePath + "");
+                ///storage/emulated/0/bluetooth/IMG_20201213_194457.jpg
+                subirImagen(picturePath);
+                ivImagen.setImageBitmap(thumbnail);
+            }
+        }
+
+    }
+
+    public void subirImagen(String path) {
+        try {
+            Log.e(TAG, "subirImagen: " + path );
+            InputStream stream = new FileInputStream(new File(path));
+            String[] splitNombre = path.split("/");
+            String nombre = splitNombre[splitNombre.length-1];
+
+            Log.e("***" + TAG, "subirImagen: " + splitNombre.length + " - " + nombre );
+
+            FirebaseStorage storage = FirebaseStorage.getInstance();
+
+            StorageReference storageRef = storage.getReference();
+
+            StorageReference mountainsRef = storageRef.child("image_" + nombre );
+
+            UploadTask uploadTask = mountainsRef.putStream(stream);
+            uploadTask.addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception exception) {
+                    Log.e(TAG, "onFailure: " + exception );
+                    // Handle unsuccessful uploads
+                }
+            }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                    Log.e(TAG, "onSuccess: " + taskSnapshot.getBytesTransferred() + " - " + taskSnapshot.getTotalByteCount() );
+                    // taskSnapshot.getMetadata() contains file metadata such as size, content-type, etc.
+                    // ...
+                }
+            });
+
+
+        } catch (Exception e) {
+            Log.e(TAG, "subirImagen: " + e.getCause());
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void onClick(View v) {
+     switch (v.getId()){
+         case R.id.btnSubirCamara:File file = new File(Environment.getExternalStorageDirectory(), app_Directory);
+             boolean isDirectoryCreated = file.exists();
+
+             if (!isDirectoryCreated) {
+                 isDirectoryCreated = file.mkdirs();
+             }
+
+             String name = "";
+             if (isDirectoryCreated) {
+                 name = "Img_" + (System.currentTimeMillis() / 1000) + ".jpg";
+             }
+
+             mPath = Environment.getExternalStorageDirectory() + File.separator + app_Directory + File.separator + name;
+
+             File imagen = new File(mPath);
+
+             StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
+             StrictMode.setVmPolicy(builder.build());
+
+             Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+             intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(imagen));
+             startActivityForResult(intent, 1);
+             break;
+         case R.id.btnSubirGaleria:
+             Intent intent2 = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+             startActivityForResult(intent2, 2);
+             break;
+     }
     }
 }

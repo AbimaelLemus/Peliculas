@@ -5,10 +5,58 @@
     android:layout_height="match_parent"
     tools:context=".SubirImagenes.Vista.Subir_Imagen">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="@string/imagenes" />
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:text="@string/subirImagenes" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:weightSum="2">
+
+            <Button
+                android:id="@+id/btnSubirCamara"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:layout_weight="1"
+                android:background="@drawable/btn_azul_transparente"
+                android:text="@string/camara"
+                tools:ignore="ButtonStyle" />
+
+            <Button
+                android:id="@+id/btnSubirGaleria"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:layout_weight="1"
+                android:background="@drawable/btn_azul_transparente"
+                android:text="@string/galeria"
+                tools:ignore="ButtonStyle" />
+
+        </LinearLayout>
+
+
+
+
+        <ImageView
+            android:visibility="gone"
+            android:id="@+id/ivSubir"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/img_place_holder"
+            android:adjustViewBounds="true" />
+
+
+    </LinearLayout>
+
 
 </FrameLayout>

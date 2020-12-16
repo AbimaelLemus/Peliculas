@@ -1,5 +1,6 @@
 package com.postulacion.prueba2.Home.Adapter;
 
+import android.app.Activity;
 import android.content.Context;
 
 import androidx.fragment.app.Fragment;
@@ -12,8 +13,9 @@ import com.postulacion.prueba2.Ubicaciones.Vista.Ubicaciones;
 
 public class AdapterHome extends FragmentStatePagerAdapter {
     private Context context;
+    private Activity activity;
 
-    public AdapterHome(FragmentManager fm, Context context) {
+    public AdapterHome(FragmentManager fm, Context context, Activity activity) {
         super(fm);
         this.context = context;
     }
@@ -26,7 +28,7 @@ public class AdapterHome extends FragmentStatePagerAdapter {
             case 1:
                 return new Ubicaciones(context);
             case 2:
-                return new Subir_Imagen();
+                return new Subir_Imagen(activity);
             default:
                 return new PeliculasVista();
         }
