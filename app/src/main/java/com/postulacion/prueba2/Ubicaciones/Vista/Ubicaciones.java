@@ -6,6 +6,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
@@ -29,10 +30,31 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.postulacion.prueba2.R;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 public class Ubicaciones extends Fragment {
     private String TAG = "Ubicaciones";
@@ -41,10 +63,24 @@ public class Ubicaciones extends Fragment {
     private TextView tvUbicacion;
     private TextView tvTiempoRestante;
     private CountDownTimer countDownTimer;
-    private boolean runTimer = false;
+    private int tiempoObtencionUbicacion = 1;
+    private GoogleMap mMap;
+    private Double latitud;
+    private Double longitud;
+    private SupportMapFragment mapFragment;
+    private String verificacionTimer = null;
+    private SharedPreferences preferences;
+    private SharedPreferences.Editor editor;
+
+    private ArrayList<Marker> tmpRealTimeMarkers = new ArrayList<>();
+    private ArrayList<Marker> realTimeMarkers = new ArrayList<>();
+
+    // Access a Cloud Firestore instance from your Activity
+    private FirebaseFirestore db;
 
     public Ubicaciones(Context context) {
         this.context = context;
+        db = FirebaseFirestore.getInstance();
     }
 
     @Override
@@ -59,8 +95,15 @@ public class Ubicaciones extends Fragment {
         View view = inflater.inflate(R.layout.fragment_ubicaciones, container, false);
         locationManager = (LocationManager) getActivity().getSystemService(getContext().LOCATION_SERVICE);
 
+        preferences = getActivity().getSharedPreferences(this.getResources().getString(R.string.prefDatosUser), Context.MODE_PRIVATE);
+        editor = preferences.edit();
+        verificacionTimer = preferences.getString("runTimer", null);
+
         tvUbicacion = view.findViewById(R.id.tvUbiNombre);
         tvTiempoRestante = view.findViewById(R.id.tvUbiTiempoRestante);
+
+        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+        mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
 
         if (statusGPS("onCreateView")) {//gps activo
             verificarPermisoUbicacio("onCreateView");
@@ -148,54 +191,69 @@ public class Ubicaciones extends Fragment {
     private final LocationListener locationListenerNetwork = new LocationListener() {
 
         public void onLocationChanged(final Location location) {
-            if (!runTimer) {
+            verificacionTimer = preferences.getString("runTimer", null);
+            //Log.w(TAG, "onLocationChanged: " + verificacionTimer);
 
+            if (verificacionTimer == null) {
                 Geocoder geocoder = new Geocoder(context, Locale.getDefault());
                 List<Address> list;
                 try {
                     list = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
                     Address data = list.get(0);
+                    Log.e(TAG, "onLocationChanged: " + data.getLongitude() + " - " + data.getLatitude());
+
+                    subirInformacion(data);
+
                     tvUbicacion.setText(data.getLocality() + ", " + data.getAdminArea() + ", " + data.getCountryName());
+                    editor.putString("runTimer", "false").apply();
+                    //locationManager.removeUpdates(locationListenerNetwork);
+
 
                 } catch (Exception e) {
                     mostrarToast("NO SE PUDO OBTENER LA UBICACION");
                 }
 
-                countDownTimer = new CountDownTimer(30 * 60 * 1000, 1000) {
+            } else {
 
-                    @SuppressLint("LongLogTag")
-                    public void onTick(long millisUntilFinished) {
-                        runTimer = true;
-                        long segundos = millisUntilFinished / 1000;
-                        long minutos = segundos / 60;
-                        String tiempo = "Tiempo para obtener siguiente ubicacion";
-                        //Log.i(tiempo,  (minutos + 1) + " M.");
-                        tvTiempoRestante.setText(tiempo + "\n" + (minutos + 1) + " m");
-                    }
+                if (verificacionTimer.equals("false")) {
+                    pintarDireccionesEnMapa();
 
-                    public void onFinish() {
-                        runTimer = false;
-                        Geocoder geocoder = new Geocoder(context, Locale.getDefault());
-                        List<Address> list;
-                        try {
-                            list = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
-                            Address data = list.get(0);
-                            tvUbicacion.setText(data.getLocality() + ", " + data.getAdminArea() + ", " + data.getCountryName());
+                    countDownTimer = new CountDownTimer(tiempoObtencionUbicacion * 60 * 1000, 1000) {
 
-                        } catch (Exception e) {
-                            mostrarToast("NO SE PUDO OBTENER LA UBICACION");
+                        @SuppressLint("LongLogTag")
+                        public void onTick(long millisUntilFinished) {
+                            editor.putString("runTimer", "true").apply();
+                            long segundos = millisUntilFinished / 1000;
+                            long minutos = segundos / 60;
+                            String tiempo = "Tiempo para obtener siguiente ubicacion";
+                            if (segundos == 3 || segundos == 2 || segundos == 1) {
+                                Log.i(tiempo, segundos + " S.");
+                            }
+                            tvTiempoRestante.setText(tiempo + "\n" + (minutos + 1) + " m");
                         }
-                        //locationManager.removeUpdates(locationListenerNetwork);
-                    }
-                }.start();
+
+                        public void onFinish() {
+                            editor.putString("runTimer", "false").apply();
+                            Geocoder geocoder = new Geocoder(context, Locale.getDefault());
+                            List<Address> list;
+                            try {
+                                list = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
+                                Address data = list.get(0);
+                                subirInformacion(data);
+                                tvUbicacion.setText(data.getLocality() + ", " + data.getAdminArea() + ", " + data.getCountryName());
+
+                            } catch (Exception e) {
+                                mostrarToast("NO SE PUDO OBTENER LA UBICACION");
+                            }
+                            //locationManager.removeUpdates(locationListenerNetwork);
+                        }
+                    }.start();
+                } else {
+                    //cancelarTimer();
+                }
+
             }
 
-        }
-
-        public void cancelarTimer() {
-            if (countDownTimer != null) {
-                countDownTimer.cancel();
-            }
         }
 
         @Override
@@ -213,8 +271,127 @@ public class Ubicaciones extends Fragment {
         }
     };
 
+    private void subirInformacion(Address data) {
+
+        String fecha = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(new Date());
+        String hora = new SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(new Date());
+
+        // Create a new user with a first and last name
+        Map<String, Object> ubicacionUsuario = new HashMap<>();
+        ubicacionUsuario.put("longitud", "" + data.getLongitude());
+        ubicacionUsuario.put("latitud", "" + data.getLatitude());
+        ubicacionUsuario.put("ciudad", "" + data.getLocality());
+        ubicacionUsuario.put("estado", "" + data.getAdminArea());
+        ubicacionUsuario.put("pais", "" + data.getCountryName());
+        ubicacionUsuario.put("fecha", fecha);
+        ubicacionUsuario.put("hora", hora);
+
+        Log.e(TAG, "subirInformacion: " + data.getLatitude() + " - " + data.getLongitude());
+
+        /*db.collection("ubicacion")
+                .document("direcciones")
+                .set(ubicacionUsuario, SetOptions.merge());*/
+
+        //collectionReference.document("direcciones").set(ubicacionUsuario);
+
+
+        // Add a new document with a generated ID
+        db.collection("ubicacion")
+                .add(ubicacionUsuario)
+                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                    @Override
+                    public void onSuccess(DocumentReference documentReference) {
+                        //mostrarToast("Informacion guardada correctamente!!!");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        mostrarToast("La ultima ubicacion no se guardo!!!");
+                    }
+                });
+
+        pintarDireccionesEnMapa();
+
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.e(TAG, "onResume: ##############");
+        pintarDireccionesEnMapa();
+    }
+
+    private void pintarDireccionesEnMapa() {
+
+        db.collection("ubicacion")
+                //.whereEqualTo("pais", "México")
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+
+                            mapFragment.getMapAsync(new OnMapReadyCallback() {
+                                @Override
+                                public void onMapReady(final GoogleMap googleMap) {
+                                    mMap = googleMap;
+
+                                    for (Marker marker : realTimeMarkers) {
+                                        marker.remove();
+                                    }
+
+                                    int i = 0;
+
+                                    //mMap.addMarker(new MarkerOptions().position(new LatLng(latitud, longitud)).title(ciudad + ", " + estado));
+                                    for (QueryDocumentSnapshot document : task.getResult()) {
+
+                                        //Log.d(TAG, document.getId() + " => " + document.getData());
+
+                                        latitud = Double.parseDouble(String.valueOf(document.getData().get("latitud")));
+                                        longitud = Double.parseDouble(String.valueOf(document.getData().get("longitud")));
+                                        String ciudad = String.valueOf(document.getData().get("ciudad"));
+                                        String estado = String.valueOf(document.getData().get("estado"));
+
+                                        //Log.e(TAG, "onComplete: " + (i+1) + " : " + latitud + " - " + longitud);
+                                        i++;
+
+                                        CameraPosition googlePlex = CameraPosition.builder()
+                                                .target(new LatLng(latitud, longitud))
+                                                .bearing(0)
+                                                .tilt(45)
+                                                .build();
+
+                                        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(googlePlex), 1000, null);
+
+                                        MarkerOptions markerOptions = new MarkerOptions();
+                                        markerOptions.position(new LatLng(latitud, longitud)).title(ciudad + ", " + estado);
+
+
+                                        tmpRealTimeMarkers.add(mMap.addMarker(markerOptions));
+                                    }
+                                    Log.e(TAG, "onMapReady: totalDirecciones: " + (i + 1));
+
+
+                                    realTimeMarkers.clear();
+                                    realTimeMarkers.addAll(tmpRealTimeMarkers);
+
+                                }
+                            });
+
+
+                        } else {
+                            Log.d(TAG, "Error getting documents: ", task.getException());
+                        }
+                    }
+                });
+
+
+    }
+
+
     public void mostrarToast(String mensaje) {
-        Toast.makeText(getContext(), mensaje, Toast.LENGTH_SHORT).show();
+        Toast.makeText(context, mensaje, Toast.LENGTH_LONG).show();
     }
 
     private void configGPS() {

@@ -9,7 +9,9 @@
     <!--solo trae una pelicula-->
     <!--<string name="pathMovies" translatable="false">https://api.themoviedb.org/3/movie/550?api_key=a01845c41c53a55ae2454547f29544af</string>-->
     <string name="aceptar">Aceptar</string>
+    <string name="prefDatosUser">Preferencias usuario</string>
     <string name="cerrar">Cerrar</string>
-    <string name="tiempoRestante">Tiempo restante</string>
+    <string name="tiempoRestante">Visualizar en mapa</string>
     <string name="alertInfoMovieTitulo">Información</string>
+    <string name="google_maps_key">AIzaSyCm82umlLJIEpUUF0Ta91wSEAlnygOsOGQ</string>
 </resources>

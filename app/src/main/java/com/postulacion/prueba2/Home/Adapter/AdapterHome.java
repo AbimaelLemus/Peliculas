@@ -18,11 +18,6 @@ public class AdapterHome extends FragmentStatePagerAdapter {
         this.context = context;
     }
 
-    /**
-     * Ing. Bisman Abimael Perez Lemus
-     * Met. getItem()
-     * este metodo recibe el numero del item de la pantalla que se le presentara al usuario
-     */
     @Override
     public Fragment getItem(int position) {
         switch (position) {
