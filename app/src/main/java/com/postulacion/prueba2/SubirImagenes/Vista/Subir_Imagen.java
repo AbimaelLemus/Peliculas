@@ -19,6 +19,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -44,6 +46,7 @@ public class Subir_Imagen extends Fragment implements View.OnClickListener {
     private String TAG = "Subir_Imagen";
     private static String app_Directory = "DCIM/Camera/";
     private String mPath = "";
+    private ProgressBar progressBar;
 
     public Subir_Imagen(Activity activity) {
         this.activity = activity;
@@ -64,6 +67,7 @@ public class Subir_Imagen extends Fragment implements View.OnClickListener {
 
         view.findViewById(R.id.btnSubirCamara).setOnClickListener(this);
         view.findViewById(R.id.btnSubirGaleria).setOnClickListener(this);
+        progressBar = view.findViewById(R.id.progressBar);
 
         return view;
     }
@@ -128,6 +132,8 @@ public class Subir_Imagen extends Fragment implements View.OnClickListener {
 
     public void subirImagen(String path) {
         try {
+            ivImagen.setVisibility(View.INVISIBLE);
+            progressBar.setVisibility(View.VISIBLE);
             Log.e(TAG, "subirImagen: " + path );
             InputStream stream = new FileInputStream(new File(path));
             String[] splitNombre = path.split("/");
@@ -146,16 +152,24 @@ public class Subir_Imagen extends Fragment implements View.OnClickListener {
                 @Override
                 public void onFailure(@NonNull Exception exception) {
                     Log.e(TAG, "onFailure: " + exception );
+                    ivImagen.setVisibility(View.VISIBLE);
+                    progressBar.setVisibility(View.INVISIBLE);
+                    Toast.makeText(getContext(), "Error al cargar la imagen", Toast.LENGTH_SHORT).show();
                     // Handle unsuccessful uploads
                 }
             }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                 @Override
                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                     Log.e(TAG, "onSuccess: " + taskSnapshot.getBytesTransferred() + " - " + taskSnapshot.getTotalByteCount() );
+                    Toast.makeText(getContext(), "Carga de imagen, exitosa!!!", Toast.LENGTH_SHORT).show();
+                    ivImagen.setVisibility(View.VISIBLE);
+                    progressBar.setVisibility(View.INVISIBLE);
                     // taskSnapshot.getMetadata() contains file metadata such as size, content-type, etc.
                     // ...
                 }
             });
+
+
 
 
         } catch (Exception e) {
