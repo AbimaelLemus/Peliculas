@@ -63,7 +63,7 @@ public class Ubicaciones extends Fragment {
     private TextView tvUbicacion;
     private TextView tvTiempoRestante;
     private CountDownTimer countDownTimer;
-    private int tiempoObtencionUbicacion = 1;
+    private int tiempoObtencionUbicacion = 30;
     private GoogleMap mMap;
     private Double latitud;
     private Double longitud;
