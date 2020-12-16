@@ -1,15 +1,12 @@
 package com.postulacion.prueba2.Peliculas.Vista;
 
-import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.postulacion.prueba2.Peliculas.Adapter.AdapterMovies;
@@ -50,9 +47,9 @@ public class PeliculasVista extends Fragment implements InterfacesPeliculas.Vist
 
     @Override
     public void mostrarLoader(boolean mostrar) {
-        if (mostrar){
+        if (mostrar) {
             loader.show();
-        }else {
+        } else {
             loader.dismiss();
         }
     }
@@ -67,7 +64,7 @@ public class PeliculasVista extends Fragment implements InterfacesPeliculas.Vist
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (loader!=null && loader.isShowing()){
+        if (loader != null && loader.isShowing()) {
             loader.dismiss();
         }
     }

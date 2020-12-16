@@ -52,7 +52,7 @@ public class PeliculasPresentador implements InterfacesPeliculas.Presentador {
 
             } catch (Exception e) {
                 e.printStackTrace();
-                Log.e(TAG, "parseo de json " );
+                Log.e(TAG, "parseo de json ");
                 vista.mostrarLoader(false);
                 //setear error de json
             }

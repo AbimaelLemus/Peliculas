@@ -5,10 +5,27 @@
     android:layout_height="match_parent"
     tools:context=".Ubicaciones.Vista.Ubicaciones">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="@string/ubicacion" />
+        android:orientation="vertical"
+        tools:ignore="UselessParent">
+
+        <TextView
+            android:id="@+id/tvUbiNombre"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textStyle="bold"
+            android:text="@string/ubicacion" />
+
+        <TextView
+            android:id="@+id/tvUbiTiempoRestante"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/tiempoRestante" />
+
+    </LinearLayout>
 
 </FrameLayout>

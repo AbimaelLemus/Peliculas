@@ -8,11 +8,13 @@ public class InterfacesPeliculas {
 
     public interface Vista {
         void peliculas(ArrayList<BeanMovies> movies);
+
         void mostrarLoader(boolean mostrar);
     }
 
     public interface Presentador {
         void obtenerPeliculas();
+
         void returnPeliculas(String resultado);
     }
 
