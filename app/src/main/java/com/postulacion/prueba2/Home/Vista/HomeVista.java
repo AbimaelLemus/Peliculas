@@ -13,7 +13,7 @@ public class HomeVista extends AppCompatActivity {
 
     private ViewPager vpHome;
     private TabLayout tlHome;
-    private String TAG = "HomeVista";
+    private String TAG = "HomeVista ";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
